@@ -22,7 +22,9 @@ def handle_message(message):
                 username = message.from_user.username
                 msgo = message.text[10:]
                 msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> @{username}'
+                save = f"<b>Petición archivada📦</b>"
                 bot.send_message(idgroup, msgn, parse_mode='HTML')
+                bot.reply_to(message, save, parse_mode='HTML')
             else:
                 ID = message.from_user.id
                 msgo = message.text[10:]
