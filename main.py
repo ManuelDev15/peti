@@ -1,4 +1,4 @@
-import telebot
+ioimport telebot
 from telebot import types
 import threading
 import http.server
@@ -41,7 +41,7 @@ def handle_message(message):
 
 ### MAIN #######################
 def run_server():
-    PORT = 8028
+    PORT = 8029
     Handler = http.server.SimpleHTTPRequestHandler
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print(f"Serving at port {PORT}")
