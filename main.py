@@ -1,4 +1,4 @@
-ioimport telebot
+import telebot
 from telebot import types
 import threading
 import http.server
