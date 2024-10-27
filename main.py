@@ -12,6 +12,7 @@ idgroup = -1002369751844
 
 channel = -1002360088103
 chann = "DevFast_FreeUp"
+group = "DevFast_FreeUpChat"
 
 admins = {7346891727, 6181692448}
 archived_messages = []
@@ -26,6 +27,15 @@ def resetarchiving(message):
     archived_messages.clear()
     bot.reply_to(message, "<b><i>Reset ejecutado</i></b>", parse_mode='HTML')
 
+#####
+
+@bot.message_handler(commands=['v'])
+def sendmessactual(message):
+    ver = "<b>Versión: 0.3</b>"
+    bot.reply_to(message, ver, parse_mode='HTML')
+
+#######
+
 @bot.message_handler(func=lambda message: True and not message.text.startswith('/') and message.chat.type == 'private')
 def archive_message(message):
     user_id = message.from_user.id
@@ -39,7 +49,7 @@ def archive_message(message):
                 arg1 = args[1]
                 forms = f"<a href='{arg1}'>{arg0} ⬅</a>"
                 archived_messages.append("• " + f"<b>{forms}</b>")
-                cmessage = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n".join(archived_messages) + "\n\n<b>/listo</b>"
+                cmessage = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n\n".join(archived_messages) + "\n\n<b>/listo</b>"
                 bot.reply_to(message, cmessage, parse_mode='HTML', disable_web_page_preview=True)
 
             else:
@@ -50,12 +60,12 @@ def archive_message(message):
 @bot.message_handler(commands=['listo'])
 def send_archived_messages(message):
     if archived_messages:
-        combined_message = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n".join(archived_messages)
+        combined_message = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n\n".join(archived_messages)
         msl = bot.send_message(channel, combined_message, parse_mode='HTML', disable_web_page_preview=True)
         
         meslink = f"https://t.me/{chann}/{msl.message_id}"
-        linf = f"<a href='{meslink}'>Mensaje enviado al canal☑️</a>"
-        listo = f"\n\n<b>{linf}</b>"
+        linf = f"<a href='{meslink}'>🔗Link</a>"
+        listo = f"\n\n<b>Mensaje enviado al canal☑️\n\n{linf}</b>"
         bot.send_message(message.chat.id, listo, parse_mode='HTML', disable_web_page_preview=True)
         
         archived_messages.clear()
@@ -66,7 +76,6 @@ def send_archived_messages(message):
 ################
 
 
-#@bot.message_handler(func=lambda message: message.chat.type == 'group')
 @bot.message_handler(content_types=['text'])
 def handle_message(message):
     if '#' in message.text:
@@ -74,9 +83,11 @@ def handle_message(message):
             if message.from_user.username is not None:
                 username = message.from_user.username
                 msgo = message.text[10:]
-                msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> @{username}'
+                mlink = f"https://t.me/{group}/{message.message_id}"
+                link = f"<a href='{mlink}'>🔗Link🔗</a>"
+                msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> @{username}\n<b>{link}</b>'
                 save = f"<b>Petición archivada📦</b>"
-                bot.send_message(idgroup, msgn, parse_mode='HTML')
+                bot.send_message(idgroup, msgn, parse_mode='HTML', disable_web_page_preview=True)
                 bot.reply_to(message, save, parse_mode='HTML')
             else:
                 ID = message.from_user.id
@@ -91,7 +102,6 @@ def handle_message(message):
                 threading.Thread(target=delete_message, args=(message.chat.id, eli.message_id, 15)).start()
             except Exception as e:
                 print(f"Error al enviar mensaje informativo:\n{e}")
-
 
 
 ### MAIN #######################
