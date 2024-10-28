@@ -31,7 +31,10 @@ def resetarchiving(message):
 
 @bot.message_handler(commands=['v'])
 def sendmessactual(message):
-    ver = "<b>Versión: 0.3</b>"
+    user_id = message.from_user.id
+    if user_id not in admins:
+        return
+    ver = "<b>Versión: 0.4</b>"
     bot.reply_to(message, ver, parse_mode='HTML')
 
 #######
@@ -59,6 +62,9 @@ def archive_message(message):
 
 @bot.message_handler(commands=['listo'])
 def send_archived_messages(message):
+    user_id = message.from_user.id
+    if user_id not in admins:
+        return
     if archived_messages:
         combined_message = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n\n".join(archived_messages)
         msl = bot.send_message(channel, combined_message, parse_mode='HTML', disable_web_page_preview=True)
