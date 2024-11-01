@@ -34,7 +34,7 @@ def sendmessactual(message):
     user_id = message.from_user.id
     if user_id not in admins:
         return
-    ver = "<b>Versión: 0.4</b>"
+    ver = "<b>Versión: 0.5</b>"
     bot.reply_to(message, ver, parse_mode='HTML')
 
 #######
@@ -52,7 +52,7 @@ def archive_message(message):
                 arg1 = args[1]
                 forms = f"<a href='{arg1}'>{arg0} ⬅</a>"
                 archived_messages.append("• " + f"<b>{forms}</b>")
-                cmessage = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n\n".join(archived_messages) + "\n\n<b>/listo</b>"
+                cmessage = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n".join(archived_messages) + "\n\n<b>/listo</b>"
                 bot.reply_to(message, cmessage, parse_mode='HTML', disable_web_page_preview=True)
 
             else:
@@ -66,7 +66,7 @@ def send_archived_messages(message):
     if user_id not in admins:
         return
     if archived_messages:
-        combined_message = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n\n".join(archived_messages)
+        combined_message = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n".join(archived_messages)
         msl = bot.send_message(channel, combined_message, parse_mode='HTML', disable_web_page_preview=True)
         
         meslink = f"https://t.me/{chann}/{msl.message_id}"
@@ -85,7 +85,23 @@ def send_archived_messages(message):
 @bot.message_handler(content_types=['text'])
 def handle_message(message):
     if '#' in message.text:
-        if '#peticion' in message.text:
+        if '#peticiones' in message.text:
+            if message.from_user.username is not None:
+                username = message.from_user.username
+                msgo = message.text[12:]
+                mlink = f"https://t.me/{group}/{message.message_id}"
+                link = f"<a href='{mlink}'>🔗Link🔗</a>"
+                msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> @{username}\n<b>{link}</b>'
+                save = f"<b>Petición archivada📦</b>"
+                bot.send_message(idgroup, msgn, parse_mode='HTML', disable_web_page_preview=True)
+                bot.reply_to(message, save, parse_mode='HTML')
+            else:
+                ID = message.from_user.id
+                msgo = message.text[12:]
+                msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> <a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
+                bot.send_message(idgroup, msgn, parse_mode='HTML')
+                
+        elif '#peticion' in message.text:
             if message.from_user.username is not None:
                 username = message.from_user.username
                 msgo = message.text[10:]
@@ -100,15 +116,17 @@ def handle_message(message):
                 msgo = message.text[10:]
                 msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> <a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
                 bot.send_message(idgroup, msgn, parse_mode='HTML')
+            
+            
         else:
-            ms = "<b>☝🏻🤓Las peticiones son de esta forma:</b>\n\n<code>#peticion *y aquí inserta la petición*</code>\n\n<i>•Solo así se guardará en el bot•</i>"
+            ms = "<b>☝🏻🤓Las peticiones son de esta forma:</b>\n\n<code>#peticion *y aquí inserta la petición*</code>\n\n<i>•Solo así se guardará en el bot•</i>\n\n<code>⚠️En esta update ya se acepta #peticiones⚠️</code>"
 
             try:
                 eli = bot.reply_to(message, ms, parse_mode='HTML')
                 threading.Thread(target=delete_message, args=(message.chat.id, eli.message_id, 15)).start()
             except Exception as e:
                 print(f"Error al enviar mensaje informativo:\n{e}")
-
+                
 
 ### MAIN #######################
 def run_server():
