@@ -14,7 +14,7 @@ channel = -1002360088103
 chann = "DevFast_FreeUp"
 group = "DevFast_FreeUpChat"
 
-admins = {7346891727, 6181692448}
+admins = {7346891727, 6181692448, 1142828252, 5463723604}
 archived_messages = []
 
 def delete_message(chat_id, message_id, delay):
@@ -34,7 +34,7 @@ def sendmessactual(message):
     user_id = message.from_user.id
     if user_id not in admins:
         return
-    ver = "<b>Versión: 0.5</b>"
+    ver = "<b>Versión: 0.5.1</b>"
     bot.reply_to(message, ver, parse_mode='HTML')
 
 #######
@@ -116,10 +116,26 @@ def handle_message(message):
                 msgo = message.text[10:]
                 msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> <a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
                 bot.send_message(idgroup, msgn, parse_mode='HTML')
+                
+        elif '#petición' in message.text:
+            if message.from_user.username is not None:
+                username = message.from_user.username
+                msgo = message.text[10:]
+                mlink = f"https://t.me/{group}/{message.message_id}"
+                link = f"<a href='{mlink}'>🔗Link🔗</a>"
+                msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> @{username}\n<b>{link}</b>'
+                save = f"<b>Petición archivada📦</b>"
+                bot.send_message(idgroup, msgn, parse_mode='HTML', disable_web_page_preview=True)
+                bot.reply_to(message, save, parse_mode='HTML')
+            else:
+                ID = message.from_user.id
+                msgo = message.text[10:]
+                msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> <a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
+                bot.send_message(idgroup, msgn, parse_mode='HTML')
             
             
         else:
-            ms = "<b>☝🏻🤓Las peticiones son de esta forma:</b>\n\n<code>#peticion *y aquí inserta la petición*</code>\n\n<i>•Solo así se guardará en el bot•</i>\n\n<code>⚠️En esta update ya se acepta #peticiones⚠️</code>"
+            ms = "<b>☝🏻🤓Las peticiones son de esta forma:</b>\n\n<code>#petición *y aquí inserta la petición*</code>\n\n<i>•Solo así se guardarán las peticiones•</i>\n\n<code>⚠️En esta update ya se acepta #petición⚠️</code>"
 
             try:
                 eli = bot.reply_to(message, ms, parse_mode='HTML')
