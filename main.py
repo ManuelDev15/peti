@@ -5,6 +5,7 @@ import http.server
 import socketserver
 import re
 import time
+from telebot.types import ReactionTypeEmoji
 
 API_TOKEN = '7764656259:AAF_7mPJUHp7egPMxnINjk0FMjgyu4q8Rbs'
 bot = telebot.TeleBot(API_TOKEN)
@@ -21,11 +22,13 @@ def delete_message(chat_id, message_id, delay):
     time.sleep(delay)
     bot.delete_message(chat_id, message_id)
 
+#####
 
 @bot.message_handler(commands=['reset'])
 def resetarchiving(message):
     archived_messages.clear()
     bot.reply_to(message, "<b><i>Reset ejecutado</i></b>", parse_mode='HTML')
+    threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
 
 #####
 
@@ -34,8 +37,10 @@ def sendmessactual(message):
     user_id = message.from_user.id
     if user_id not in admins:
         return
-    ver = "<b>Versión: 0.5.1</b>"
-    bot.reply_to(message, ver, parse_mode='HTML')
+    ver = "<b><i>version:</i> 0.5.2</b>"
+    reac = bot.send_message(message.chat.id, ver, parse_mode='HTML')
+    threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
+    bot.set_message_reaction(message.chat.id, reac.id, [ReactionTypeEmoji("🆒")])
 
 #######
 
@@ -56,7 +61,8 @@ def archive_message(message):
                 bot.reply_to(message, cmessage, parse_mode='HTML', disable_web_page_preview=True)
 
             else:
-                bot.reply_to(message, "<b>Recuerda enviar el nombre, el signo igual (=) y después el link</b>", parse_mode='HTML')
+                reme = bot.reply_to(message, "<b>Recuerda enviar el nombre, el signo igual (=) y después el link</b>", parse_mode='HTML')
+                threading.Thread(target=delete_message, args=(message.chat.id, reme.message_id, 10)).start()
 
 
 
@@ -71,12 +77,13 @@ def send_archived_messages(message):
         
         meslink = f"https://t.me/{chann}/{msl.message_id}"
         linf = f"<a href='{meslink}'>🔗Link</a>"
-        listo = f"\n\n<b>Mensaje enviado al canal☑️\n\n{linf}</b>"
+        listo = f"\n\n<b>Mensaje enviado al canal☑️\n\n--{linf}--</b>"
         bot.send_message(message.chat.id, listo, parse_mode='HTML', disable_web_page_preview=True)
         
         archived_messages.clear()
     else:
-        bot.reply_to(message, "<i>No hay mensajes archivados</i>", parse_mode='HTML' )
+        noarch = bot.reply_to(message, "<i>No hay mensajes archivados</i>", parse_mode='HTML' )
+        threading.Thread(target=delete_message, args=(message.chat.id, noarch.message_id, 10)).start()
 
 
 ################
@@ -86,6 +93,7 @@ def send_archived_messages(message):
 def handle_message(message):
     if '#' in message.text:
         if '#peticiones' in message.text:
+            bot.set_message_reaction(message.chat.id, message.id, [ReactionTypeEmoji("👻")])
             if message.from_user.username is not None:
                 username = message.from_user.username
                 msgo = message.text[12:]
@@ -102,6 +110,7 @@ def handle_message(message):
                 bot.send_message(idgroup, msgn, parse_mode='HTML')
                 
         elif '#peticion' in message.text:
+            bot.set_message_reaction(message.chat.id, message.id, [ReactionTypeEmoji("👻")])
             if message.from_user.username is not None:
                 username = message.from_user.username
                 msgo = message.text[10:]
@@ -118,6 +127,7 @@ def handle_message(message):
                 bot.send_message(idgroup, msgn, parse_mode='HTML')
                 
         elif '#petición' in message.text:
+            bot.set_message_reaction(message.chat.id, message.id, [ReactionTypeEmoji("👻")])
             if message.from_user.username is not None:
                 username = message.from_user.username
                 msgo = message.text[10:]
@@ -133,9 +143,9 @@ def handle_message(message):
                 msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> <a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
                 bot.send_message(idgroup, msgn, parse_mode='HTML')
             
-            
         else:
             ms = "<b>☝🏻🤓Las peticiones son de esta forma:</b>\n\n<code>#petición *y aquí inserta la petición*</code>\n\n<i>•Solo así se guardarán las peticiones•</i>\n\n<code>⚠️En esta update ya se acepta #petición⚠️</code>"
+            bot.set_message_reaction(message.chat.id, message.id, [ReactionTypeEmoji("✍")])
 
             try:
                 eli = bot.reply_to(message, ms, parse_mode='HTML')
