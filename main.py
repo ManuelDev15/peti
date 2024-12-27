@@ -16,6 +16,7 @@ chann = "DevFast_FreeUp"
 group = "DevFast_FreeUpChat"
 
 admins = {7346891727, 6181692448, 1142828252, 5463723604}
+usersban = {6874274574}
 archived_messages = []
 
 def delete_message(chat_id, message_id, delay):
@@ -37,7 +38,7 @@ def sendmessactual(message):
     user_id = message.from_user.id
     if user_id not in admins:
         return
-    ver = "<b><i>version:</i> 0.5.2</b>"
+    ver = "<b><i>version:</i> 0.5.3</b>"
     reac = bot.send_message(message.chat.id, ver, parse_mode='HTML')
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
     bot.set_message_reaction(message.chat.id, reac.id, [ReactionTypeEmoji("🆒")])
@@ -91,6 +92,8 @@ def send_archived_messages(message):
 
 @bot.message_handler(content_types=['text'])
 def handle_message(message):
+    if message.from_user.id in usersban:
+        return
     if '#' in message.text:
         if '#peticiones' in message.text:
             bot.set_message_reaction(message.chat.id, message.id, [ReactionTypeEmoji("👻")])
