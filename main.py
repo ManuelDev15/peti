@@ -59,7 +59,7 @@ def send_uptime(message):
     curren = current_time.minute
     if current == 0:
         current = "00"
-    bot.send_message(7346891727, f"<b>Tiempo real del bot:</b> <code>{current}:{curren}</code>", parse_mode="html")
+    bot.send_message(7346891727, f"<b>Tiempo real del bot:</b> <code>{current}:{curren}</code>")
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
 
 #######
@@ -70,7 +70,7 @@ def resetarchiving(message):
     if user_id not in admins:
         return
     archived_messages.clear()
-    bot.send_message(message.chat.id, "<b><i>▎Reset en los mensajes archivados</i></b>", parse_mode='HTML')
+    bot.send_message(message.chat.id, "<b><i>▎Reset en los mensajes archivados</i></b>")
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
 
 #####
@@ -80,36 +80,12 @@ def sendmessactual(message):
     user_id = message.from_user.id
     if user_id not in admins:
         return
-    ver = "<b>▎<i>version:</i> 0.5.5</b>"
-    reac = bot.send_message(message.chat.id, ver, parse_mode='HTML')
+    ver = "<b>▎<i>version:</i> 0.5.6</b>"
+    reac = bot.send_message(message.chat.id, ver)
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
     bot.set_message_reaction(message.chat.id, reac.id, [ReactionTypeEmoji(random.choice(emoyis))])
     
 #######
-
-@bot.message_handler(func=lambda message: True and not message.text.startswith('/'))
-def archive_message(message):
-    if message.text.lower() == "hi" or message.text.lower() == "hola":
-        bot.send_message(message.chat.id, "<b>Hola!</b>")
-    user_id = message.from_user.id
-    if user_id not in admins:
-        return
-    if message.chat.type == 'private':
-        if archived_messages is not None:
-            args = message.text.split("=")
-            if len(args) == 2:
-                arg0 = args[0]
-                arg1 = args[1]
-                forms = f"<a href='{arg1}'>{arg0} ⬅</a>"
-                archived_messages.append("• " + f"<b>{forms}</b>")
-                cmessage = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n".join(archived_messages) + "\n\n<b>/listo</b>"
-                bot.reply_to(message, cmessage, parse_mode='HTML', disable_web_page_preview=True)
-
-            else:
-                reme = bot.reply_to(message, "<b>Recuerda enviar el nombre, el signo igual (=) y después el link</b>", parse_mode='HTML')
-                threading.Thread(target=delete_message, args=(message.chat.id, reme.message_id, 10)).start()
-
-
 
 @bot.message_handler(commands=['listo'])
 def send_archived_messages(message):
@@ -127,17 +103,18 @@ def send_archived_messages(message):
         
         archived_messages.clear()
     else:
-        noarch = bot.reply_to(message, "<i>No hay mensajes archivados</i>", parse_mode='HTML' )
+        noarch = bot.reply_to(message, "<i>No hay mensajes archivados</i>")
         threading.Thread(target=delete_message, args=(message.chat.id, noarch.message_id, 10)).start()
 
+####
 
-################
-
-
-@bot.message_handler(content_types=['text'])
-def handle_message(message):
+@bot.message_handler(func=lambda message: True and not message.text.startswith('/'))
+def archive_message(message):
     if message.from_user.id in usersban:
         return
+    if message.text.lower() == "hi" or message.text.lower() == "hola":
+        bot.send_message(message.chat.id, "<b>Hola!</b>")
+        
     if '#' in message.text:
         if '#peticiones' in message.text:
             bot.set_message_reaction(message.chat.id, message.id, [ReactionTypeEmoji(random.choice(emoyis))])
@@ -148,13 +125,13 @@ def handle_message(message):
                 link = f"<a href='{mlink}'>🔗Link🔗</a>"
                 msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> @{username}\n<b>{link}</b>'
                 save = f"<b>▎Petición archivada📦</b>"
-                bot.send_message(idgroup, msgn, parse_mode='HTML', disable_web_page_preview=True)
-                bot.reply_to(message, save, parse_mode='HTML')
+                bot.send_message(idgroup, msgn,disable_web_page_preview=True)
+                bot.reply_to(message, save)
             else:
                 ID = message.from_user.id
                 msgo = message.text[12:]
                 msgn = f'<code>{msgo} </code>\n\n<b>✅Petición de:</b><a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
-                bot.send_message(idgroup, msgn, parse_mode='HTML')
+                bot.send_message(idgroup, msgn)
                 
         elif '#peticion' in message.text:
             bot.set_message_reaction(message.chat.id, message.id, [ReactionTypeEmoji(random.choice(emoyis))])
@@ -165,13 +142,13 @@ def handle_message(message):
                 link = f"<a href='{mlink}'>🔗Link🔗</a>"
                 msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> @{username}\n<b>{link}</b>'
                 save = f"<b>▎Petición archivada📦</b>"
-                bot.send_message(idgroup, msgn, parse_mode='HTML', disable_web_page_preview=True)
-                bot.reply_to(message, save, parse_mode='HTML')
+                bot.send_message(idgroup, msgn, disable_web_page_preview=True)
+                bot.reply_to(message, save)
             else:
                 ID = message.from_user.id
                 msgo = message.text[10:]
                 msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b><a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
-                bot.send_message(idgroup, msgn, parse_mode='HTML')
+                bot.send_message(idgroup, msgn)
                 
         elif '#petición' in message.text:
             bot.set_message_reaction(message.chat.id, message.id, [ReactionTypeEmoji(random.choice(emoyis))])
@@ -182,23 +159,39 @@ def handle_message(message):
                 link = f"<a href='{mlink}'>🔗Link🔗</a>"
                 msgn = f'<code>{msgo} </code>\n\n<b>✅Petición de:</b> @{username}\n<b>{link}</b>'
                 save = f"<b>▎Petición archivada📦</b>"
-                bot.send_message(idgroup, msgn, parse_mode='HTML', disable_web_page_preview=True)
-                bot.reply_to(message, save, parse_mode='HTML')
+                bot.send_message(idgroup, msgn, disable_web_page_preview=True)
+                bot.reply_to(message, save)
             else:
                 ID = message.from_user.id
                 msgo = message.text[10:]
                 msgn = f'<code>{msgo} </code>\n\n<b>✅Petición de:</b> <a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
-                bot.send_message(idgroup, msgn, parse_mode='HTML')
+                bot.send_message(idgroup, msgn)
             
         else:
             ms = "<b>▎☝🏻🤓Las peticiones son de esta forma:</b>\n<pre>#petición *y aquí inserta la petición*</pre>\n<pre>#peticion *y aquí inserta la petición*</pre>\n<pre>#peticiones *y aquí inserta la petición*</pre>\n<i>   • Solo así se guardarán las peticiones •</i>"
             bot.set_message_reaction(message.chat.id, message.id, [ReactionTypeEmoji("✍")])
 
             try:
-                eli = bot.reply_to(message, ms, parse_mode='HTML')
+                eli = bot.reply_to(message, ms)
                 threading.Thread(target=delete_message, args=(message.chat.id, eli.message_id, 20)).start()
             except Exception as e:
                 print(f"Error al enviar mensaje informativo:\n\n{e}")
+    
+    if message.from_user.id not in admins:
+        return
+    if message.chat.type == 'private':
+        if archived_messages is not None:
+            args = message.text.split("=")
+            if len(args) == 2:
+                arg0 = args[0]
+                arg1 = args[1]
+                forms = f"<a href='{arg1}'>{arg0} ⬅</a>"
+                archived_messages.append("• " + f"<b>{forms}</b>")
+                cmessage = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n".join(archived_messages) + "\n\n<b>/listo</b>"
+                bot.reply_to(message, cmessage, disable_web_page_preview=True)
+            else:
+                reme = bot.reply_to(message, "<b>Recuerda enviar el nombre, el signo igual (=) y después el link</b>")
+                threading.Thread(target=delete_message, args=(message.chat.id, reme.message_id, 10)).start()
 
 
 ### MAIN #######################
