@@ -17,10 +17,9 @@ idgroup = -1002369751844
 channel = -1002360088103
 chann = "DevFast_FreeUp"
 group = "DevFast_FreeUpChat"
-#######
+#####
 admins = {7346891727, 6181692448, 1142828252, 5463723604}
 usersban = {6874274574}
-idaski = (2360088103,)
 archived_messages = []
 
 emoyis = ["🍓", "🌭", "🔥", "🕊", "🐳", "🌚", "⚡️", "☃️", "💯", "🍾", "🏆", "🗿", "👻", "👨‍💻", "🎃", "🎄", "💊", "🦄", "👌🏻", "🆒"]
@@ -98,7 +97,7 @@ def resetarchiving(message):
 def sendmessactual(message):
     if message.from_user.id not in admins:
         return
-    ver = "<b>▎<i>version:</i> 0.5.8</b>"
+    ver = "<b>▎<i>version:</i> 0.5.9</b>"
     reac = bot.send_message(message.chat.id, ver)
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
     #bot.set_message_reaction(message.chat.id, reac.id, [ReactionTypeEmoji(random.choice(emoyis))])
@@ -127,14 +126,12 @@ def send_archived_messages(message):
 
 @bot.message_handler(func=lambda message: True and not message.text.startswith('/'))
 def archive_message(message):
-    if message.from_user.id in idaski:
-        return
     if message.from_user.id in usersban:
         return
     if message.text.lower() == "hi" or message.text.lower() == "hola":
         bot.send_message(message.chat.id, "<b>Hola!</b>")
-        
-    if '#' in message.text:
+    
+    if message.text.startswith('#'):
         if '#peticiones' in message.text:
             bot.set_message_reaction(message.chat.id, message.id, [ReactionTypeEmoji(random.choice(emoyis))])
             if message.from_user.username is not None:
