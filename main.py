@@ -18,9 +18,9 @@ channel = -1002360088103
 chann = "DevFast_FreeUp"
 group = "DevFast_FreeUpChat"
 #######
-
 admins = {7346891727, 6181692448, 1142828252, 5463723604}
 usersban = {6874274574}
+idaski = (2360088103,)
 archived_messages = []
 
 emoyis = ["🍓", "🌭", "🔥", "🕊", "🐳", "🌚", "⚡️", "☃️", "💯", "🍾", "🏆", "🗿", "👻", "👨‍💻", "🎃", "🎄", "💊", "🦄", "👌🏻", "🆒"]
@@ -62,6 +62,7 @@ def send_uptime(message):
         uptime_message = f"*▎He estado activo durante:* `{days}d, {hours}h, {minutes}m, {seconds}s`."
 
     bot.send_message(message.chat.id, uptime_message, parse_mode="Markdown")
+    threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
     
 #### 
 
@@ -126,6 +127,8 @@ def send_archived_messages(message):
 
 @bot.message_handler(func=lambda message: True and not message.text.startswith('/'))
 def archive_message(message):
+    if message.from_user.id in idaski:
+        return
     if message.from_user.id in usersban:
         return
     if message.text.lower() == "hi" or message.text.lower() == "hola":
