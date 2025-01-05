@@ -62,11 +62,23 @@ def send_uptime(message):
         uptime_message = f"*▎He estado activo durante:* `{days}d, {hours}h, {minutes}m, {seconds}s`."
 
     bot.send_message(message.chat.id, uptime_message, parse_mode="Markdown")
-    current = current_time.hour
-    curren = current_time.minute
-    if current == 0:
-        current = "00"
-    bot.send_message(7346891727, f"<b>Tiempo real del bot:</b> <code>{current}:{curren}</code>")
+    
+#### 
+
+@bot.message_handler(commands=['tb'])
+def send_uptime(message):
+    if message.from_user.id not in admins:
+        return
+    current_time = datetime.now()
+    curreh = current_time.hour
+    currem = current_time.minute
+    mm = "am"
+    if curreh == 0:
+        curreh = "12"
+    if curreh > 12:
+        curreh = curreh - 12
+        mm = "pm"
+    bot.send_message(7346891727, f"<b>▎Tiempo real del bot:</b> <code>{curreh}:{currem}</code> <b>{mm}</b>")
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
 
 #######
@@ -85,7 +97,7 @@ def resetarchiving(message):
 def sendmessactual(message):
     if message.from_user.id not in admins:
         return
-    ver = "<b>▎<i>version:</i> 0.5.7</b>"
+    ver = "<b>▎<i>version:</i> 0.5.8</b>"
     reac = bot.send_message(message.chat.id, ver)
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
     #bot.set_message_reaction(message.chat.id, reac.id, [ReactionTypeEmoji(random.choice(emoyis))])
