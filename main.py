@@ -33,10 +33,17 @@ def delete_message(chat_id, message_id, delay):
 
 #####
 
+@bot.message_handler(commands=['i'])
+def sendmesid(m):
+    if m.reply_to_message:
+        userid = m.reply_to_message.from_user.id
+        bot.send_message(m.chat.id, f"<code>{userid}</code>")
+
+#####
+
 @bot.message_handler(commands=['t'])
 def send_uptime(message):
-    user_id = message.from_user.id
-    if user_id not in admins:
+    if message.from_user.id not in admins:
         return
     current_time = datetime.now()
     uptime = current_time - start_time
@@ -66,8 +73,7 @@ def send_uptime(message):
 
 @bot.message_handler(commands=['reset'])
 def resetarchiving(message):
-    user_id = message.from_user.id
-    if user_id not in admins:
+    if message.from_user.id not in admins:
         return
     archived_messages.clear()
     bot.send_message(message.chat.id, "<b><i>▎Reset en los mensajes archivados</i></b>")
@@ -77,10 +83,9 @@ def resetarchiving(message):
 
 @bot.message_handler(commands=['v'])
 def sendmessactual(message):
-    user_id = message.from_user.id
-    if user_id not in admins:
+    if message.from_user.id not in admins:
         return
-    ver = "<b>▎<i>version:</i> 0.5.6</b>"
+    ver = "<b>▎<i>version:</i> 0.5.7</b>"
     reac = bot.send_message(message.chat.id, ver)
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
     #bot.set_message_reaction(message.chat.id, reac.id, [ReactionTypeEmoji(random.choice(emoyis))])
@@ -89,8 +94,7 @@ def sendmessactual(message):
 
 @bot.message_handler(commands=['listo'])
 def send_archived_messages(message):
-    user_id = message.from_user.id
-    if user_id not in admins:
+    if message.from_user.id not in admins:
         return
     if archived_messages:
         combined_message = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n".join(archived_messages)
