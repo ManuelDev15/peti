@@ -83,7 +83,7 @@ def sendmessactual(message):
     ver = "<b>▎<i>version:</i> 0.5.6</b>"
     reac = bot.send_message(message.chat.id, ver)
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
-    bot.set_message_reaction(message.chat.id, reac.id, [ReactionTypeEmoji(random.choice(emoyis))])
+    #bot.set_message_reaction(message.chat.id, reac.id, [ReactionTypeEmoji(random.choice(emoyis))])
     
 #######
 
