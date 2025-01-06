@@ -18,6 +18,16 @@ channel = -1002360088103
 chann = "DevFast_FreeUp"
 group = "DevFast_FreeUpChat"
 #####
+comandos = {
+'i': 'Saber id de alguien (responder a un mensaje)',
+'d': 'Hablar por el bot',
+'add': 'Agregar un admin al bot',
+'t': 'Tiempo activo del bot',
+'tb': 'Hora real del bot',
+'v': 'Ver la versión del bot',
+'com': 'Información sobre los comandos disponibles para admins(este mensaje)'}
+
+god = 7346891727 #6181692448
 admins = {7346891727, 6181692448, 1142828252, 5463723604, 7372906088}
 usersban = {6874274574}
 archived_messages = []
@@ -32,11 +42,68 @@ def delete_message(chat_id, message_id, delay):
 
 #####
 
+@bot.message_handler(commands=['com'])
+def comandoshelp(m):
+    if m.from_user.id not in admins:
+        return
+    comm = "<pre><b>Los siguientes comandos están disponibles(admins):</b></pre>\n"
+    for comando in comandos:
+        comm += f"<b>▎/{comando}:</b> "
+        comm += f"<b>  {comandos[comando]}</b>\n"
+    bot.send_message(m.chat.id, comm)
+    threading.Thread(target=delete_message, args=(m.chat.id, m.message_id, 0)).start()
+    
+######
+
 @bot.message_handler(commands=['i'])
 def sendmesid(m):
     if m.reply_to_message:
         userid = m.reply_to_message.from_user.id
-        bot.send_message(m.chat.id, f"<code>{userid}</code>")
+        bot.send_message(m.chat.id, f"▎<code>{userid}</code>")
+
+#####
+
+@bot.message_handler(commands=['d'])
+def hablarxbot(m):
+    if m.from_user.id not in admins:
+        return
+    if len(m.text.split()) < 2:
+        threading.Thread(target=delete_message, args=(m.chat.id, m.message_id, 0)).start()
+        return
+    else:
+        say = m.text[3:]
+        if m.reply_to_message:
+            repms = m.reply_to_message
+            bot.reply_to(repms, say)
+            threading.Thread(target=delete_message, args=(m.chat.id, m.message_id, 0)).start()
+        else:
+            bot.send_message(m.chat.id, say)
+            threading.Thread(target=delete_message, args=(m.chat.id, m.message_id, 0)).start()
+
+#####
+
+@bot.message_handler(commands=['add'])
+def addadmin(m):
+    if m.from_user.id not in admins:
+        return
+    if len(m.text.split()) < 2:
+        bot.send_message(m.chat.id, "▎Su uso es así: /add -id-")
+    else:
+        idadmin = int(m.text.split()[1])
+        if idadmin not in admins:
+            admins.add(idadmin)
+            text = f"<b>▎Id: <code>{idadmin}</code> agregado</b>"
+            text2 = f"<pre>Actualizar:</pre>\n<code>admins = {admins}</code>"
+            if m.from_user.id == god:
+                bot.send_message(god, text)
+                bot.send_message(god, text2)
+            else:
+                bot.send_message(m.chat.id, text)
+                bot.send_message(god, text)
+                bot.send_message(god, text2)
+        else:
+            bot.send_message(m.chat.id, f"▎<b>El id: <code>{idadmin}</code>  ya es admin</b>")
+        print(f"admins = {admins}")
 
 #####
 
@@ -49,18 +116,18 @@ def send_uptime(message):
     
     days, seconds = uptime.days, uptime.seconds
     hours = seconds // 3600
-    minutes = (seconds % 3600) // 60
-    seconds = seconds % 60
+    min = (seconds % 3600) // 60
+    sec = seconds % 60
+    text = "▎<b>He estado activo durante: </b>"
     if days == 0:
-        uptime_message = f"*▎He estado activo durante:* `{hours}h, {minutes}m, {seconds}s`."
+        upmessage = f"{text}<code>{hours}h, {min}m, {sec}s</code>"
         if hours == 0:
-            uptime_message = f"*▎He estado activo durante:* `{minutes}m, {seconds}s`."
-            if minutes == 0:
-                uptime_message = f"*▎He estado activo durante:* `{seconds}s`."
+            upmessage = f"{text}<code>{min}m, {sec}s</code>"
+            if min == 0:
+                upmessage = f"{text}<code>{sec}s</code>"
     else:
-        uptime_message = f"*▎He estado activo durante:* `{days}d, {hours}h, {minutes}m, {seconds}s`."
-
-    bot.send_message(message.chat.id, uptime_message, parse_mode="Markdown")
+        upmessage = f"{text}<code>{days}d, {hours}h, {min}m, {sec}s</code>"
+    bot.send_message(message.chat.id, upmessage)
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
     
 #### 
@@ -78,8 +145,19 @@ def send_uptime(message):
     if curreh > 12:
         curreh = curreh - 12
         mm = "pm"
-    bot.send_message(message.chat.id, f"<b>▎Tiempo real del bot:</b> <code>{curreh}:{currem}</code> <b>{mm}</b>")
+    bot.send_message(message.chat.id, f"<b>▎Hora real del bot:</b> <code>{curreh}:{currem}</code> <b>{mm}</b>")
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
+
+#####
+
+@bot.message_handler(commands=['v'])
+def sendmessactual(message):
+    if message.from_user.id not in admins:
+        return
+    ver = "<b>▎<i>version:</i> 0.6.1</b>"
+    reac = bot.send_message(message.chat.id, ver)
+    threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
+    #bot.set_message_reaction(message.chat.id, reac.id, [ReactionTypeEmoji(random.choice(emoyis))])
 
 #######
 
@@ -91,17 +169,6 @@ def resetarchiving(message):
     bot.send_message(message.chat.id, "<b><i>▎Reset en los mensajes archivados</i></b>")
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
 
-#####
-
-@bot.message_handler(commands=['v'])
-def sendmessactual(message):
-    if message.from_user.id not in admins:
-        return
-    ver = "<b>▎<i>version:</i> 0.5.9</b>"
-    reac = bot.send_message(message.chat.id, ver)
-    threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
-    #bot.set_message_reaction(message.chat.id, reac.id, [ReactionTypeEmoji(random.choice(emoyis))])
-    
 #######
 
 @bot.message_handler(commands=['listo'])
@@ -109,7 +176,7 @@ def send_archived_messages(message):
     if message.from_user.id not in admins:
         return
     if archived_messages:
-        combined_message = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n".join(archived_messages)
+        combined_message = "▎<b>📄Lista de peticiones subidas:</b>\n\n" + "\n".join(archived_messages)
         msl = bot.send_message(channel, combined_message, parse_mode='HTML', disable_web_page_preview=True)
         
         meslink = f"https://t.me/{chann}/{msl.message_id}"
@@ -130,7 +197,11 @@ def archive_message(message):
         return
     if message.text.lower() == "hi" or message.text.lower() == "hola":
         bot.send_message(message.chat.id, "<b>Hola!</b>")
-    
+        return
+    if message.text.lower() == "jey?":
+        bot.send_message(message.chat.id, "<b>No🤶</b>")
+        return
+        
     if message.text.startswith('#'):
         if '#peticiones' in message.text:
             bot.set_message_reaction(message.chat.id, message.id, [ReactionTypeEmoji(random.choice(emoyis))])
@@ -139,14 +210,14 @@ def archive_message(message):
                 msgo = message.text[12:]
                 mlink = f"https://t.me/{group}/{message.message_id}"
                 link = f"<a href='{mlink}'>🔗Link🔗</a>"
-                msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> @{username}\n<b>{link}</b>'
+                msgn = f'<code>{msgo}</code>\n\n<b>▎Petición de:</b> @{username}\n<b>{link}</b>'
                 save = f"<b>▎Petición archivada📦</b>"
                 bot.send_message(idgroup, msgn,disable_web_page_preview=True)
                 bot.reply_to(message, save)
             else:
                 ID = message.from_user.id
                 msgo = message.text[12:]
-                msgn = f'<code>{msgo} </code>\n\n<b>✅Petición de:</b><a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
+                msgn = f'<code>{msgo} </code>\n\n<b>▎Petición de:</b><a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
                 bot.send_message(idgroup, msgn)
                 
         elif '#peticion' in message.text:
@@ -156,14 +227,14 @@ def archive_message(message):
                 msgo = message.text[10:]
                 mlink = f"https://t.me/{group}/{message.message_id}"
                 link = f"<a href='{mlink}'>🔗Link🔗</a>"
-                msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b> @{username}\n<b>{link}</b>'
+                msgn = f'<code>{msgo}</code>\n\n<b>▎Petición de:</b> @{username}\n<b>{link}</b>'
                 save = f"<b>▎Petición archivada📦</b>"
                 bot.send_message(idgroup, msgn, disable_web_page_preview=True)
                 bot.reply_to(message, save)
             else:
                 ID = message.from_user.id
                 msgo = message.text[10:]
-                msgn = f'<code>{msgo}</code>\n\n<b>✅Petición de:</b><a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
+                msgn = f'<code>{msgo}</code>\n\n<b>▎Petición de:</b><a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
                 bot.send_message(idgroup, msgn)
                 
         elif '#petición' in message.text:
@@ -173,14 +244,14 @@ def archive_message(message):
                 msgo = message.text[10:]
                 mlink = f"https://t.me/{group}/{message.message_id}"
                 link = f"<a href='{mlink}'>🔗Link🔗</a>"
-                msgn = f'<code>{msgo} </code>\n\n<b>✅Petición de:</b> @{username}\n<b>{link}</b>'
+                msgn = f'<code>{msgo} </code>\n\n<b>▎Petición de:</b> @{username}\n<b>{link}</b>'
                 save = f"<b>▎Petición archivada📦</b>"
                 bot.send_message(idgroup, msgn, disable_web_page_preview=True)
                 bot.reply_to(message, save)
             else:
                 ID = message.from_user.id
                 msgo = message.text[10:]
-                msgn = f'<code>{msgo} </code>\n\n<b>✅Petición de:</b> <a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
+                msgn = f'<code>{msgo} </code>\n\n<b>▎Petición de:</b> <a href="tg://openmessage?user_id={ID}">ID:{ID}</a>'
                 bot.send_message(idgroup, msgn)
             
         else:
@@ -203,10 +274,10 @@ def archive_message(message):
                 arg1 = args[1]
                 forms = f"<a href='{arg1}'>{arg0} ⬅</a>"
                 archived_messages.append("• " + f"<b>{forms}</b>")
-                cmessage = "<b>📄Lista de peticiones subidas:</b>\n\n" + "\n".join(archived_messages) + "\n\n<b>/listo</b>"
+                cmessage = "<pre>📄Lista de peticiones subidas:</pre>\n\n" + "\n".join(archived_messages) + "\n\n<b>/listo</b>"
                 bot.reply_to(message, cmessage, disable_web_page_preview=True)
             else:
-                reme = bot.reply_to(message, "<b>Recuerda enviar el nombre, el signo igual (=) y después el link</b>")
+                reme = bot.reply_to(message, "▎<b>Recuerda enviar el nombre, el signo igual (=) y después el link</b>")
                 threading.Thread(target=delete_message, args=(message.chat.id, reme.message_id, 10)).start()
 
 
