@@ -18,7 +18,7 @@ channel = -1002360088103
 chann = "DevFast_FreeUp"
 group = "DevFast_FreeUpChat"
 #####
-admins = {7346891727, 6181692448, 1142828252, 5463723604}
+admins = {7346891727, 6181692448, 1142828252, 5463723604, 7372906088}
 usersban = {6874274574}
 archived_messages = []
 
@@ -78,7 +78,7 @@ def send_uptime(message):
     if curreh > 12:
         curreh = curreh - 12
         mm = "pm"
-    bot.send_message(7346891727, f"<b>▎Tiempo real del bot:</b> <code>{curreh}:{currem}</code> <b>{mm}</b>")
+    bot.send_message(message.chat.id, f"<b>▎Tiempo real del bot:</b> <code>{curreh}:{currem}</code> <b>{mm}</b>")
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
 
 #######
