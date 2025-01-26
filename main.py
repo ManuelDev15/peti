@@ -28,29 +28,44 @@ comandos = {
 'tb': 'Hora real del bot',
 'v': 'Ver la versión del bot',
 'com': 'Información sobre los comandos disponibles para admins(este mensaje)'}
+version = "0.6.3"
 
-god = 7346891727 #6181692448
+god = 7346891727
 admins = {7346891727, 6181692448, 1142828252, 5463723604, 7372906088}
-usersban = {6874274574}
+usersban = {6874274574,}
+curiosos = []
 archived_messages = []
 
 emoyis = ["🍓", "🌭", "🔥", "🕊", "🐳", "🌚", "⚡️", "☃️", "💯", "🍾", "🏆", "🗿", "👻", "👨‍💻", "🎃", "🎄", "💊", "🦄", "👌🏻", "🆒"]
 start_time = datetime.now()
 #####
 
+grupo2 = -1002322607547
+def listener(messages):
+    for m in messages:
+        if m.content_type == 'text':
+            if m.chat.id == grupo2:
+                return
+            if m.from_user.id == 6181692448:
+                return
+            info = "@devfastpeticionbot • " + f"@{str(m.from_user.username)}" + " [" + str(m.from_user.id) + "]:\n" + m.text
+            #print(info)
+            bot.send_message(grupo2, info)
+            
+bot.set_update_listener(listener)
+#######
+
 def delete_message(chat_id, message_id, delay):
     time.sleep(delay)
     bot.delete_message(chat_id, message_id)
 
 ######
-
 def teclado_inline(arte):
     global mlink
     
     teclado = types.InlineKeyboardMarkup()
     
     btn_linkbtn = types.InlineKeyboardButton("mensaje💬", url=mlink)
-    
     #####
     if arte == "linkb":
         teclado.row_width = 1
@@ -58,7 +73,7 @@ def teclado_inline(arte):
     
     return teclado
 
-
+#######
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
     
@@ -202,8 +217,8 @@ def send_uptime(message):
 def sendmessactual(message):
     if message.from_user.id not in admins:
         return
-    ver = "<b>▎<i>version:</i> 0.6.2</b>"
-    reac = bot.send_message(message.chat.id, ver)
+    versionm = f"<b>▎<i>version: </i>{version}</b>"
+    reac = bot.send_message(message.chat.id, versionm)
     threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
     #bot.set_message_reaction(message.chat.id, reac.id, [ReactionTypeEmoji(random.choice(emoyis))])
 
@@ -269,6 +284,7 @@ def archive_message(message):
 #####################
  
     if message.text.startswith('#'):
+        namet = message.from_user.first_name
         if message.chat.id != groupp:
             return
         global mlink
@@ -286,7 +302,7 @@ def archive_message(message):
                 ID = message.from_user.id
                 msgo = message.text[12:]
                 mlink = f"https://t.me/{group}/{message.message_id}"
-                msgn = f"<code>{msgo} </code>\n\n<b>▎Petición de:</b> <a href='tg://openmessage?user_id={ID}'>ID: {ID}</a>"
+                msgn = f"<code>{msgo} </code>\n\n<b>▎Petición de:</b> <a href='tg://openmessage?user_id={ID}'>{namet}</a> [<code>{ID}</code>]"
                 save = f"<b>▎Petición archivada📦</b>"
                 bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb"))
                 bot.reply_to(message, save)
@@ -305,7 +321,7 @@ def archive_message(message):
                 ID = message.from_user.id
                 msgo = message.text[10:]
                 mlink = f"https://t.me/{group}/{message.message_id}"
-                msgn = f"<code>{msgo} </code>\n\n<b>▎Petición de:</b> <a href='tg://openmessage?user_id={ID}'>ID: {ID}</a>"
+                msgn = f"<code>{msgo} </code>\n\n<b>▎Petición de:</b> <a href='tg://openmessage?user_id={ID}'>{namet}</a> [<code>{ID}</code>]"
                 save = f"<b>▎Petición archivada📦</b>"
                 bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb"))
                 bot.reply_to(message, save)
@@ -324,7 +340,7 @@ def archive_message(message):
                 ID = message.from_user.id
                 msgo = message.text[10:]
                 mlink = f"https://t.me/{group}/{message.message_id}"
-                msgn = f"<code>{msgo} </code>\n\n<b>▎Petición de:</b> <a href='tg://openmessage?user_id={ID}'>ID: {ID}</a>"
+                msgn = f"<code>{msgo} </code>\n\n<b>▎Petición de:</b> <a href='tg://openmessage?user_id={ID}'>{namet}</a> [<code>{ID}</code>]"
                 save = f"<b>▎Petición archivada📦</b>"
                 bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb"))
                 bot.reply_to(message, save)
@@ -366,5 +382,6 @@ if __name__ == '__main__':
 
     hilo_bot = threading.Thread(name="hilo_bot", target=recibir_mensajes)
     hilo_bot.start()
-    print('Bot Iniciado✓')
+    print("\033[32mBot Iniciado✓\033[0m")
+    print(f"version: {version}")
     print("--------------------------------")
