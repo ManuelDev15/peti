@@ -46,6 +46,8 @@ def listener(messages):
         if m.content_type == 'text':
             if m.chat.id == grupo2:
                 return
+            if m.fron_user.id == 7346891727:
+                return
             if m.from_user.id == 6181692448:
                 return
             info = "@devfastpeticionbot • " + f"@{str(m.from_user.username)}" + " [" + str(m.from_user.id) + "]:\n" + m.text
