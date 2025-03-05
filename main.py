@@ -28,10 +28,11 @@ comandos = {
 'tb': 'Hora real del bot',
 'v': 'Ver la versión del bot',
 'l':'Enviar el link del mensaje al Canal',
+'lc':'Salir de un grupo',
 'com': 'Información sobre los comandos disponibles para admins(este mensaje)'}
-version = "0.6.5"
+version = "0.6.6"
 
-god = 7346891727
+god = 6181692448
 admins = {7346891727, 6181692448, 1142828252, 5463723604, 7372906088}
 usersban = {6874274574,}
 curiosos = []
@@ -52,7 +53,8 @@ def listener(messages):
                 return
             info = "@devfastpeticionbot • " + f"@{str(m.from_user.username)}" + " [" + str(m.from_user.id) + "]:\n" + m.text
             #print(info)
-            bot.send_message(grupo2, info)
+            if m.chat.type == 'private':
+                bot.send_message(grupo2, info)
             
 bot.set_update_listener(listener)
 
@@ -99,7 +101,7 @@ def command_start(m):
     username = m.from_user.username
     if m.chat.type == 'private':
         if userid == god:
-            bot.send_message(god, "<b>Un placer verle Sr. BluSINED♥️🗿</b>")
+            bot.send_message(god, "<b>Un placer verle Sr. KatSINED♥️🗿</b>")
             return
         if userid in admins:
             bot.send_message(cid, f"▎<b>Hola admin </b>@{username} ...")
@@ -133,7 +135,31 @@ def msendlink(m):
     if m.from_user.id not in admins:
         return
     msend = "<b>¿Cómo hacer una petición?</b>"
-    bot.send_message(m.chat.id, msend, reply_markup=teclado_inline2('plink'))
+    bot.send_message(channel, msend, reply_markup=teclado_inline2('plink'))
+
+#######
+
+@bot.message_handler(commands=['lc'])
+def salirgroup(message):
+    if message.from_user.id not in admins:
+        return
+    mssg = message.text.split(" ")
+    if len(mssg) > 1:
+        if len(mssg) > 2:
+            bot.send_message(message.chat.id, "▎<b>Comando mal ejecutado</b>")
+        else:
+            if not mssg[1].isdigit():
+                bot.send_message(message.chat.id, "▎<b>error, el id son solamente números</b>")
+            else:
+                bot.send_message(message.chat.id, "▎<i>procesando...</i>")
+                id = f"-100{mssg[1]}"
+                salirg(message, id)
+    else:
+        bot.send_message(message.chat.id, "▎<b>Es /lc -id del grupo-</b>")
+
+def salirg(message, id):
+    bot.leave_chat(id)
+    bot.send_message(message.chat.id, "▎Listo")
 
 ######
 
