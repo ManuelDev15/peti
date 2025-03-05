@@ -27,8 +27,9 @@ comandos = {
 't': 'Tiempo activo del bot',
 'tb': 'Hora real del bot',
 'v': 'Ver la versión del bot',
+'l':'Enviar el link del mensaje al Canal',
 'com': 'Información sobre los comandos disponibles para admins(este mensaje)'}
-version = "0.6.3"
+version = "0.6.5"
 
 god = 7346891727
 admins = {7346891727, 6181692448, 1142828252, 5463723604, 7372906088}
@@ -37,6 +38,7 @@ curiosos = []
 archived_messages = []
 
 emoyis = ["🍓", "🌭", "🔥", "🕊", "🐳", "🌚", "⚡️", "☃️", "💯", "🍾", "🏆", "🗿", "👻", "👨‍💻", "🎃", "🎄", "💊", "🦄", "👌🏻", "🆒"]
+cont = 1
 start_time = datetime.now()
 #####
 
@@ -46,8 +48,6 @@ def listener(messages):
         if m.content_type == 'text':
             if m.chat.id == grupo2:
                 return
-            if m.fron_user.id == 7346891727:
-                return
             if m.from_user.id == 6181692448:
                 return
             info = "@devfastpeticionbot • " + f"@{str(m.from_user.username)}" + " [" + str(m.from_user.id) + "]:\n" + m.text
@@ -55,6 +55,7 @@ def listener(messages):
             bot.send_message(grupo2, info)
             
 bot.set_update_listener(listener)
+
 #######
 
 def delete_message(chat_id, message_id, delay):
@@ -62,25 +63,32 @@ def delete_message(chat_id, message_id, delay):
     bot.delete_message(chat_id, message_id)
 
 ######
+
 def teclado_inline(arte):
     global mlink
-    
     teclado = types.InlineKeyboardMarkup()
     
     btn_linkbtn = types.InlineKeyboardButton("mensaje💬", url=mlink)
+    btn_link = types.InlineKeyboardButton(">>> TOCA AQUÍ <<<", url="https://t.me/DevFast_FreeUp/22")
     #####
+    if arte == "plink":
+        teclado.add(btn_link)
     if arte == "linkb":
         teclado.row_width = 1
         teclado.add(btn_linkbtn)
     
     return teclado
 
-#######
-@bot.callback_query_handler(func=lambda call: True)
-def callback_query(call):
+def teclado_inline2(arte2):
+    teclado2 = types.InlineKeyboardMarkup()
     
-    if call.data == "linkb":
-        command_start(call.message)
+    btn_link = types.InlineKeyboardButton(">>> TOCA AQUÍ <<<", url="https://t.me/DevFast_FreeUp/22")
+    #####
+    if arte2 == "plink":
+        teclado2.row_width = 1
+        teclado2.add(btn_link)
+    
+    return teclado2
     
 #####
 
@@ -118,6 +126,15 @@ def comandoshelp(m):
     bot.send_message(m.chat.id, comm)
     threading.Thread(target=delete_message, args=(m.chat.id, m.message_id, 0)).start()
     
+######
+
+@bot.message_handler(commands=['l'])
+def msendlink(m):
+    if m.from_user.id not in admins:
+        return
+    msend = "<b>¿Cómo hacer una petición?</b>"
+    bot.send_message(m.chat.id, msend, reply_markup=teclado_inline2('plink'))
+
 ######
 
 @bot.message_handler(commands=['i'])
@@ -258,6 +275,7 @@ def send_archived_messages(message):
 
 @bot.message_handler(func=lambda message: True and not message.text.startswith('/'))
 def archive_message(message):
+    global cont
     if message.chat.type == 'private':
         if message.from_user.id not in admins:
             userid = message.from_user.id
@@ -276,7 +294,22 @@ def archive_message(message):
                 reme = bot.reply_to(message, "▎<b>Recuerda enviar el nombre, el signo igual (=) y después el link</b>")
                 threading.Thread(target=delete_message, args=(message.chat.id, reme.message_id, 10)).start()
 
-
+    
+    if "jey" in message.text.lower():
+        if cont == 1:
+            bot.reply_to(message, "🏳️‍🌈")
+            cont += 1
+        elif cont == 2:
+            bot.reply_to(message, "🏳️‍🌈")
+            cont += 1
+        elif cont == 3:
+            bot.reply_to(message, "🏳️‍🌈")
+            cont += 1
+        elif cont == 4:
+            cont += 1
+        else:
+            cont = 1
+        return
     if message.from_user.id in usersban:
         return
     if message.text.lower() == "hi" or message.text.lower() == "hola":
