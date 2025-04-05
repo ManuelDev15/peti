@@ -29,8 +29,9 @@ comandos = {
 'v': 'Ver la versión del bot',
 'l':'Enviar el link del mensaje al Canal',
 'lc':'Salir de un grupo',
+'f': 'Fijar un mensaje citandolo',
 'com': 'Información sobre los comandos disponibles para admins(este mensaje)'}
-version = "0.6.6"
+version = "0.7.0"
 
 god = 6181692448
 admins = {7346891727, 6181692448, 1142828252, 5463723604, 7372906088}
@@ -66,8 +67,8 @@ def delete_message(chat_id, message_id, delay):
 
 ######
 
-def teclado_inline(arte):
-    global mlink
+def teclado_inline(arte, mlink=0):
+    
     teclado = types.InlineKeyboardMarkup()
     
     btn_linkbtn = types.InlineKeyboardButton("mensaje💬", url=mlink)
@@ -81,17 +82,6 @@ def teclado_inline(arte):
     
     return teclado
 
-def teclado_inline2(arte2):
-    teclado2 = types.InlineKeyboardMarkup()
-    
-    btn_link = types.InlineKeyboardButton(">>> TOCA AQUÍ <<<", url="https://t.me/DevFast_FreeUp/22")
-    #####
-    if arte2 == "plink":
-        teclado2.row_width = 1
-        teclado2.add(btn_link)
-    
-    return teclado2
-    
 #####
 
 @bot.message_handler(commands=['start'])
@@ -101,7 +91,7 @@ def command_start(m):
     username = m.from_user.username
     if m.chat.type == 'private':
         if userid == god:
-            bot.send_message(god, "<b>Un placer verle Sr. KatSINED♥️🗿</b>")
+            bot.send_message(god, "<b>Un placer verle Sr. KatSIN3D♥️🗿</b>")
             return
         if userid in admins:
             bot.send_message(cid, f"▎<b>Hola admin </b>@{username} ...")
@@ -134,8 +124,9 @@ def comandoshelp(m):
 def msendlink(m):
     if m.from_user.id not in admins:
         return
-    msend = "<b>¿Cómo hacer una petición?</b>"
-    bot.send_message(channel, msend, reply_markup=teclado_inline2('plink'))
+    msend = "<b>¿Cómo hacer una petición🤔?</b>"
+    bot.send_message(channel, msend, reply_markup=teclado_inline('plink'))
+    bot.send_message(m.chat.id, "<b>Mensaje enviado correctamente al canal✅</b>")
 
 #######
 
@@ -160,6 +151,28 @@ def salirgroup(message):
 def salirg(message, id):
     bot.leave_chat(id)
     bot.send_message(message.chat.id, "▎Listo")
+
+######
+
+@bot.message_handler(commands=['f'])
+def pin_message(message):
+    if message.from_user.id not in admins:
+        return
+    if message.reply_to_message:
+        chat_id = message.chat.id
+        message_id = message.reply_to_message.message_id
+        
+        try:
+            bot.pin_chat_message(chat_id, message_id, disable_notification=True)
+            threading.Thread(target=delete_message, args=(message.chat.id, message.message_id, 0)).start()
+            
+            mes_id = message.message_id + 1
+            bot.delete_message(message.chat.id, mes_id)
+        except Exception as e:
+            bot.reply_to(message, f"<b>❌Error al anclar el mensaje:</b>\n\n{e}")
+            print(e)
+    else:
+        bot.reply_to(message, "<b>⚠️Responde a un mensaje para anclarlo</b>")
 
 ######
 
@@ -357,7 +370,11 @@ def archive_message(message):
                 mlink = f"https://t.me/{group}/{message.message_id}"
                 msgn = f'<code>{msgo}</code>\n\n<b>▎Petición de:</b> @{username}'
                 save = f"<b>▎Petición archivada📦</b>"
-                bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb"))
+                idm = bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb", mlink))
+                
+                bot.pin_chat_message(idgroup, idm.message_id, disable_notification=True)
+                mes_id = idm.message_id + 1
+                bot.delete_message(idgroup, mes_id)
                 bot.reply_to(message, save)
             else:
                 ID = message.from_user.id
@@ -365,8 +382,13 @@ def archive_message(message):
                 mlink = f"https://t.me/{group}/{message.message_id}"
                 msgn = f"<code>{msgo} </code>\n\n<b>▎Petición de:</b> <a href='tg://openmessage?user_id={ID}'>{namet}</a> [<code>{ID}</code>]"
                 save = f"<b>▎Petición archivada📦</b>"
-                bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb"))
+                idm = bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb", mlink))
+                
+                bot.pin_chat_message(idgroup, idm.message_id, disable_notification=True)
+                mes_id = idm.message_id + 1
+                bot.delete_message(idgroup, mes_id)
                 bot.reply_to(message, save)
+                
                 
         elif '#peticion' in message.text:
             bot.set_message_reaction(message.chat.id, message.id, [ReactionTypeEmoji(random.choice(emoyis))])
@@ -376,7 +398,11 @@ def archive_message(message):
                 mlink = f"https://t.me/{group}/{message.message_id}"
                 msgn = f'<code>{msgo}</code>\n\n<b>▎Petición de:</b> @{username}'
                 save = f"<b>▎Petición archivada📦</b>"
-                bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb"))
+                idm = bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb", mlink))
+                
+                bot.pin_chat_message(idgroup, idm.message_id, disable_notification=True)
+                mes_id = idm.message_id + 1
+                bot.delete_message(idgroup, mes_id)
                 bot.reply_to(message, save)
             else:
                 ID = message.from_user.id
@@ -384,7 +410,11 @@ def archive_message(message):
                 mlink = f"https://t.me/{group}/{message.message_id}"
                 msgn = f"<code>{msgo} </code>\n\n<b>▎Petición de:</b> <a href='tg://openmessage?user_id={ID}'>{namet}</a> [<code>{ID}</code>]"
                 save = f"<b>▎Petición archivada📦</b>"
-                bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb"))
+                idm = bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb", mlink))
+                
+                bot.pin_chat_message(idgroup, idm.message_id, disable_notification=True)
+                mes_id = idm.message_id + 1
+                bot.delete_message(idgroup, mes_id)
                 bot.reply_to(message, save)
                 
         elif '#petición' in message.text:
@@ -395,7 +425,11 @@ def archive_message(message):
                 mlink = f"https://t.me/{group}/{message.message_id}"
                 msgn = f'<code>{msgo}</code>\n\n<b>▎Petición de:</b> @{username}'
                 save = f"<b>▎Petición archivada📦</b>"
-                bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb"))
+                idm = bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb", mlink))
+                
+                bot.pin_chat_message(idgroup, idm.message_id, disable_notification=True)
+                mes_id = idm.message_id + 1
+                bot.delete_message(idgroup, mes_id)
                 bot.reply_to(message, save)
             else:
                 ID = message.from_user.id
@@ -403,7 +437,11 @@ def archive_message(message):
                 mlink = f"https://t.me/{group}/{message.message_id}"
                 msgn = f"<code>{msgo} </code>\n\n<b>▎Petición de:</b> <a href='tg://openmessage?user_id={ID}'>{namet}</a> [<code>{ID}</code>]"
                 save = f"<b>▎Petición archivada📦</b>"
-                bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb"))
+                idm = bot.send_message(idgroup, msgn, disable_web_page_preview=True, reply_markup=teclado_inline("linkb", mlink))
+                
+                bot.pin_chat_message(idgroup, idm.message_id, disable_notification=True)
+                mes_id = idm.message_id + 1
+                bot.delete_message(idgroup, mes_id)
                 bot.reply_to(message, save)
             
         else:
@@ -414,6 +452,7 @@ def archive_message(message):
                 eli = bot.reply_to(message, ms)
                 threading.Thread(target=delete_message, args=(message.chat.id, eli.message_id, 20)).start()
             except Exception as e:
+                bot.send_message(god, f"<b>❌Error al enviar mensaje informativo:</b>\n\n{e}")
                 print(f"Error al enviar mensaje informativo:\n\n{e}")
 
 
