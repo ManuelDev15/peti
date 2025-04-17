@@ -4,8 +4,10 @@ import threading
 import http.server
 import socketserver
 import re
+import os
 import time
 import random
+import requests
 from telebot.types import ReactionTypeEmoji
 from datetime import datetime, timedelta
 
@@ -30,14 +32,28 @@ comandos = {
 'l':'Enviar el link del mensaje al Canal',
 'lc':'Salir de un grupo',
 'f': 'Fijar un mensaje citandolo',
-'com': 'Información sobre los comandos disponibles para admins(este mensaje)'}
-version = "0.7.0"
+'com': 'Información sobre los comandos disponibles para admins(este mensaje)',
+'top': 'Top Pelis',
+'on': 'Encender subida',
+'off': 'Apagar subida',
+}
+version = "0.7.2"
 
 god = 6181692448
 admins = {7346891727, 6181692448, 1142828252, 5463723604, 7372906088}
 usersban = {6874274574,}
 curiosos = []
 archived_messages = []
+
+
+TMDB_API_KEY = "0512b3e4d3255c53d744f6892ff3e93b"
+CHANNEL_USERNAME = "@PeliSIN3Dtop"
+current_message_id = None
+auto_upload = False
+auto_interval = 3600  #segundos
+auto_thread = None
+lock = threading.Lock()
+
 
 emoyis = ["🍓", "🌭", "🔥", "🕊", "🐳", "🌚", "⚡️", "☃️", "💯", "🍾", "🏆", "🗿", "👻", "👨‍💻", "🎃", "🎄", "💊", "🦄", "👌🏻", "🆒"]
 cont = 1
@@ -82,7 +98,117 @@ def teclado_inline(arte, mlink=0):
     
     return teclado
 
-#####
+
+########## &&&&&&&&&&
+
+def get_tmdb_top_movies():
+    url = "https://api.themoviedb.org/3/movie/popular"
+    params = {
+        "api_key": TMDB_API_KEY,
+        "language": "es-ES",
+        "region": "ES",
+        "page": 1
+    }
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        data = response.json()
+        return data["results"][:10]
+    except Exception as e:
+        print(f"Error obteniendo datos de TMDB: {e}")
+        return None
+
+def format_movie_message(movies):
+    message = "🎬<b>TOP 10 PELÍCULAS MÁS VISTAS🍿:</b>\n\n"
+    for i, movie in enumerate(movies, 1):
+        title = movie.get("title", "Sin título")
+        rating = movie.get("vote_average", 0)
+        release_date = movie.get("release_date", "Fecha desconocida")
+        poster_path = movie.get("poster_path", "")
+        poster_url = f"https://image.tmdb.org/t/p/w200{poster_path}" if poster_path else ""
+        message += (
+            f"<b>{i}. <a href='{poster_url}'>{title}</a></b>\n"
+            f"   <i>⭐Calificación: {str(rating)[:3]}</i>/¹º\n"
+            f"   <i>🗓Fecha de estreno: {release_date}</i>\n\n"
+        )
+    message += "\n🔄<b>Actualizado: </b><code>" + time.strftime("%d/%m/%Y %H:%M:%S") + "</code>\n\n\n<b><a href='https://t.me/SafeZoneP3LYZIN3D'>𝗣𝗲𝗹𝗶𝗦𝗜𝗡𝟯𝗗</a></b>"
+    return message
+
+def send_or_edit_message():
+    global current_message_id
+    movies = get_tmdb_top_movies()
+    if not movies:
+        bot.send_message(god, "❌ Error al obtener datos de TMDB")
+        return
+
+    new_message = format_movie_message(movies)
+
+    try:
+        if current_message_id:
+            bot.edit_message_text(
+                chat_id=CHANNEL_USERNAME,
+                message_id=current_message_id,
+                text=new_message,
+                link_preview_options=types.LinkPreviewOptions(show_above_text=True),
+                disable_web_page_preview=False
+            )
+            
+        else:
+            sent = bot.send_message(
+                chat_id=CHANNEL_USERNAME,
+                text=new_message,
+                disable_web_page_preview=False,
+                link_preview_options=types.LinkPreviewOptions(show_above_text=True),
+            )
+            current_message_id = sent.message_id
+            
+    except Exception as e:
+        bot.send_message(god, f"Error editando o enviando mensaje: {e}")
+        #print(f"Error editando o enviando mensaje: {e}")
+        current_message_id = None
+
+def auto_upload_worker():
+    global auto_upload
+    while auto_upload:
+        with lock:
+            send_or_edit_message()
+        time.sleep(auto_interval)
+
+@bot.message_handler(commands=['top'])
+def cmd_top(message):
+    if message.from_user.id != god:
+        return
+    send_or_edit_message()
+    bot.reply_to(message, "✅ Mensaje actualizado.")
+
+@bot.message_handler(commands=['on'])
+def cmd_auto_on(message):
+    global auto_upload, auto_thread
+    if message.from_user.id != god:
+        #bot.reply_to(message, "❌ No tienes permiso para usar este comando.")
+        return
+    if auto_upload:
+        bot.reply_to(message, "⚠️ La subida automática ya está activada.")
+        return
+    auto_upload = True
+    auto_thread = threading.Thread(target=auto_upload_worker, daemon=True)
+    auto_thread.start()
+    bot.reply_to(message, "✅ Subida automática activada.")
+
+@bot.message_handler(commands=['off'])
+def cmd_auto_off(message):
+    global auto_upload
+    if message.from_user.id != god:
+        #bot.reply_to(message, "❌ No tienes permiso para usar este comando.")
+        return
+    if not auto_upload:
+        bot.reply_to(message, "⚠️ La subida automática ya está desactivada.")
+        return
+    auto_upload = False
+    bot.reply_to(message, "✅ Subida automática desactivada.")
+
+
+########## &&&&&&&&&&
 
 @bot.message_handler(commands=['start'])
 def command_start(m):
